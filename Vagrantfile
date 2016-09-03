@@ -6,4 +6,11 @@ Vagrant.configure("2") do |config|
   # 共有ディレクトリはゲストOS側でパーミッションの変更が出来ないため、mount_optionsで指定
   config.vm.synced_folder "./src/", "/var/www/html/", :owner=> 'vagrant', :group=>'wheel', :mount_options => ['dmode=775', 'fmode=775']
 
+  # provisionにansibleを使う設定
+  config.vm.provision "ansible" do |ansible|
+    ansible.limit = 'all'
+    ansible.inventory_path = "hosts"
+    ansible.playbook = "provisioning/playbook.yml"
+  end
 end
+
