@@ -1,0 +1,69 @@
+- hosts: servers
+  sudo: yes
+  tasks:
+      - name: update yum
+        yum: name=* state=latest
+
+      - name: install curl
+        yum: name=curl state=latest
+
+      - name: install vim
+        yum: name=vim state=latest
+
+      - name: install git
+        yum: name=git state=latest
+
+      - name: install apache
+        yum: name=httpd state=latest
+
+      - name: install remi repository
+        yum: name=http://rpms.famillecollet.com/enterprise/remi-release-7.rpm state=present 
+      
+      - name: install epel repository
+        yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
+
+      - name: install PHP
+        yum: name={{ item }} state=latest enablerepo=remi,remi-php70
+        with_items:
+          - php70
+          - php-devel
+          - php-mbstring
+          - php-mysql
+          - php-pdo
+          - php-gd
+
+      - name: register repository
+        yum:
+          name: http://dev.mysql.com/get/mysql57-community-release-el6-7.noarch.rpm
+          state: present
+
+      - name: install mysqld
+        yum:
+          name: "{{ item }}"
+          enablerepo: mysql57-community
+          disablerepo: mysql56-community
+          state: present
+        with_items:
+          - mysql-community-server
+          - mysql-community-client
+          - mysql-community-common
+          - mysql-community-libs
+          - mysql-community-libs-compat
+
+      - name: apache start
+        service: name=httpd state=started enabled=on
+
+      - name: mysqld start
+        service: name=mysqld state=started enabled=on
+
+      # setting iptables if need
+      - name: check httpd iptable rule
+        shell: iptables -L | grep -q http
+        register: register_http
+        failed_when: register_http.rc not in [0, 1]
+        changed_when: false
+
+      # if 80 port is not open, add iptables
+      - name: add httpd iptable rule
+        shell: iptables -I INPUT 5 -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT -m comment --comment "httpd"
+        when: register_http.rc
