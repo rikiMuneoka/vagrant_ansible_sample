@@ -25,12 +25,18 @@
       - name: install PHP
         yum: name={{ item }} state=latest enablerepo=remi,remi-php70
         with_items:
-          - php70
+          - php
+          - php-cli
+          - php-common
+          - php-fpm
           - php-devel
           - php-mbstring
-          - php-mysql
+          - php-mysqlnd
           - php-pdo
           - php-gd
+
+      - name: source php7 enable
+        shell: source /opt/remi/php70/enable
 
       - name: register repository
         yum:
@@ -40,8 +46,8 @@
       - name: install mysqld
         yum:
           name: "{{ item }}"
-          enablerepo: mysql57-community
-          disablerepo: mysql56-community
+          enablerepo: mysql56-community
+          disablerepo: mysql57-community
           state: present
         with_items:
           - mysql-community-server
