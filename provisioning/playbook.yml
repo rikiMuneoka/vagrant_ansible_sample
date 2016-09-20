@@ -60,6 +60,9 @@
       - name: apache start
         service: name=httpd state=started enabled=on
 
+      - name: copy mysqld.conf
+        copy: src=conf/mysqld.conf dest=/etc/tmpfiles.d/mysqld.conf
+
       - name: mysqld start
         service: name=mysqld state=started enabled=on
 
