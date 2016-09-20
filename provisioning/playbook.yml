@@ -34,6 +34,7 @@
           - php-mysqlnd
           - php-pdo
           - php-gd
+          - php-xml
 
       - name: source php7 enable
         shell: source /opt/remi/php70/enable
